@@ -22,7 +22,12 @@ public class FragmentPageHelper {
 
             //如果初始化位置是0手动调一次
             if (viewPager.getCurrentItem() == 0) {
-                listener.onPageSelected(0);
+                viewPager.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        listener.onPageSelected(0);
+                    }
+                });
             }
         }
     }

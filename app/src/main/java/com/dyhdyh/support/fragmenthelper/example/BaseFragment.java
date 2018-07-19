@@ -31,11 +31,11 @@ public abstract class BaseFragment extends Fragment implements FragmentLifecycle
 
     @Override
     public void onForeground() {
-        Log.d("---->", "--------->" + getClass().getSimpleName() + "---->显示在最前");
+        Log.d("---->", "--------->" + this + "---->显示在最前");
     }
 
     @Override
     public void onBackground() {
-        Log.d("---->", "--------->" + getClass().getSimpleName() + "---->退到后台");
+        Log.d("---->", "--------->" + this + "---->退到后台");
     }
 }

@@ -12,7 +12,7 @@ import com.dyhdyh.support.fragmenthelper.FragmentLifecycle;
  */
 public class OnFragmentPageChangeListener extends ViewPager.SimpleOnPageChangeListener {
     private FragmentPagerAdapter mAdapter;
-    private int mPosition;
+    private int mPosition = -1;
 
     public OnFragmentPageChangeListener(FragmentPagerAdapter adapter) {
         this.mAdapter = adapter;
@@ -21,9 +21,11 @@ public class OnFragmentPageChangeListener extends ViewPager.SimpleOnPageChangeLi
     @Override
     public void onPageSelected(int position) {
         try {
-            Fragment item = mAdapter.getItem(this.mPosition);
-            if (item instanceof FragmentLifecycle) {
-                ((FragmentLifecycle) item).onBackground();
+            if (this.mPosition >= 0) {
+                Fragment item = mAdapter.getItem(this.mPosition);
+                if (item instanceof FragmentLifecycle) {
+                    ((FragmentLifecycle) item).onBackground();
+                }
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             e.printStackTrace();
