@@ -3,9 +3,13 @@ package com.dyhdyh.support.fragmenthelper;
 import android.support.annotation.IdRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 
 import com.dyhdyh.support.fragmenthelper.listener.OnFragmentChangeListener;
+import com.dyhdyh.support.fragmenthelper.listener.OnFragmentPageChangeListener;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,6 +35,8 @@ public class FragmentHelper {
         this.mFragmentManager = fragmentManager;
         this.mContainerViewId = containerViewId;
         this.mFragments = fragments;
+
+        this.mFragmentManager.registerFragmentLifecycleCallbacks(new ShowFragmentLifecycleCallbacks(), false);
     }
 
     public List<Fragment> getFragments() {
@@ -50,6 +56,9 @@ public class FragmentHelper {
             if (fragment.isAdded()) {
                 //如果已经加过 显示当前选的
                 transaction.show(fragment);
+                if (fragment instanceof FragmentLifecycle) {
+                    ((FragmentLifecycle) fragment).onResumeShow();
+                }
             } else {
                 transaction.add(mContainerViewId, fragment, fragment.getClass().getName());
             }
@@ -57,16 +66,12 @@ public class FragmentHelper {
             if (mLastShowFragment != null) {
                 transaction.hide(mLastShowFragment);
                 if (mLastShowFragment instanceof FragmentLifecycle) {
-                    ((FragmentLifecycle) mLastShowFragment).onBackground();
+                    ((FragmentLifecycle) mLastShowFragment).onPauseShow();
                 }
             }
             mLastShowFragment = fragment;
             transaction.commitAllowingStateLoss();
             mFragmentManager.executePendingTransactions();
-
-            if (fragment instanceof FragmentLifecycle) {
-                ((FragmentLifecycle) fragment).onForeground();
-            }
 
             if (mOnFragmentChangeListener != null) {
                 mOnFragmentChangeListener.onFragmentChanged(fragment);
@@ -78,6 +83,15 @@ public class FragmentHelper {
 
     public void setOnFragmentChangeListener(OnFragmentChangeListener onFragmentChangeListener) {
         this.mOnFragmentChangeListener = onFragmentChangeListener;
+    }
+
+
+    public static void bindFragmentLifecycle(FragmentManager fm, ViewPager viewPager) {
+        final PagerAdapter adapter = viewPager.getAdapter();
+        if (adapter != null && adapter instanceof FragmentPagerAdapter) {
+            fm.registerFragmentLifecycleCallbacks(new ShowFragmentPagerLifecycleCallbacks(viewPager), false);
+            viewPager.addOnPageChangeListener(new OnFragmentPageChangeListener((FragmentPagerAdapter) adapter, viewPager.getCurrentItem()));
+        }
     }
 
 }

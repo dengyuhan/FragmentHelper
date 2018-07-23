@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
-import com.dyhdyh.support.fragmenthelper.FragmentPageHelper;
+import com.dyhdyh.support.fragmenthelper.FragmentHelper;
 import com.dyhdyh.support.fragmenthelper.adapter.SimpleFragmentPagerAdapter;
 
 /**
@@ -25,6 +25,6 @@ public class ViewPagerActivity extends AppCompatActivity {
         };
         SimpleFragmentPagerAdapter adapter = new SimpleFragmentPagerAdapter(getSupportFragmentManager(), fragments);
         vp.setAdapter(adapter);
-        FragmentPageHelper.bindFragmentLifecycle(vp);
+        FragmentHelper.bindFragmentLifecycle(getSupportFragmentManager(), vp);
     }
 }

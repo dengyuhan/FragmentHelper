@@ -30,12 +30,13 @@ public abstract class BaseFragment extends Fragment implements FragmentLifecycle
     protected abstract String getLabel();
 
     @Override
-    public void onForeground() {
+    public void onResumeShow() {
         Log.d("---->", "--------->" + this + "---->显示在最前");
     }
 
     @Override
-    public void onBackground() {
+    public void onPauseShow() {
         Log.d("---->", "--------->" + this + "---->退到后台");
     }
+
 }

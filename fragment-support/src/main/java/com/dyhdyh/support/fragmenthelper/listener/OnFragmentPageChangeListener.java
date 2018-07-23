@@ -14,8 +14,9 @@ public class OnFragmentPageChangeListener extends ViewPager.SimpleOnPageChangeLi
     private FragmentPagerAdapter mAdapter;
     private int mPosition = -1;
 
-    public OnFragmentPageChangeListener(FragmentPagerAdapter adapter) {
+    public OnFragmentPageChangeListener(FragmentPagerAdapter adapter, int currentItem) {
         this.mAdapter = adapter;
+        this.mPosition = currentItem;
     }
 
     @Override
@@ -24,7 +25,7 @@ public class OnFragmentPageChangeListener extends ViewPager.SimpleOnPageChangeLi
             if (this.mPosition >= 0) {
                 Fragment item = mAdapter.getItem(this.mPosition);
                 if (item instanceof FragmentLifecycle) {
-                    ((FragmentLifecycle) item).onBackground();
+                    ((FragmentLifecycle) item).onPauseShow();
                 }
             }
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -36,7 +37,7 @@ public class OnFragmentPageChangeListener extends ViewPager.SimpleOnPageChangeLi
         try {
             Fragment item = mAdapter.getItem(this.mPosition);
             if (item instanceof FragmentLifecycle) {
-                ((FragmentLifecycle) item).onForeground();
+                ((FragmentLifecycle) item).onResumeShow();
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             e.printStackTrace();
