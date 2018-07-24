@@ -94,4 +94,14 @@ public class FragmentHelper {
         }
     }
 
+    /**
+     * 当fragment里面有子fragment
+     * @param viewPager
+     */
+    public static void bindChildFragmentLifecycle(ViewPager viewPager) {
+        final PagerAdapter adapter = viewPager.getAdapter();
+        if (adapter != null && adapter instanceof FragmentPagerAdapter) {
+            viewPager.addOnPageChangeListener(new OnFragmentPageChangeListener((FragmentPagerAdapter) adapter, viewPager.getCurrentItem()));
+        }
+    }
 }
