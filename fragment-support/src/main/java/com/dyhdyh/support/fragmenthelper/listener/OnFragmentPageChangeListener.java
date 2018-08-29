@@ -13,6 +13,7 @@ import com.dyhdyh.support.fragmenthelper.FragmentLifecycle;
 public class OnFragmentPageChangeListener extends ViewPager.SimpleOnPageChangeListener {
     private FragmentPagerAdapter mAdapter;
     private int mPosition = -1;
+    private int mSelectedPosition = -1;
 
     public OnFragmentPageChangeListener(FragmentPagerAdapter adapter, int currentItem) {
         this.mAdapter = adapter;
@@ -20,27 +21,36 @@ public class OnFragmentPageChangeListener extends ViewPager.SimpleOnPageChangeLi
     }
 
     @Override
-    public void onPageSelected(int position) {
-        try {
-            if (this.mPosition >= 0) {
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        super.onPageScrolled(position, positionOffset, positionOffsetPixels);
+        if (mSelectedPosition == position && positionOffset == 0f) {
+            try {
+                mSelectedPosition = -1;
+                if (this.mPosition >= 0) {
+                    Fragment item = mAdapter.getItem(this.mPosition);
+                    if (item instanceof FragmentLifecycle) {
+                        ((FragmentLifecycle) item).onPauseShow();
+                    }
+                }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                e.printStackTrace();
+            }
+
+            this.mPosition = position;
+
+            try {
                 Fragment item = mAdapter.getItem(this.mPosition);
                 if (item instanceof FragmentLifecycle) {
-                    ((FragmentLifecycle) item).onPauseShow();
+                    ((FragmentLifecycle) item).onResumeShow();
                 }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                e.printStackTrace();
             }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            e.printStackTrace();
         }
+    }
 
-        this.mPosition = position;
-
-        try {
-            Fragment item = mAdapter.getItem(this.mPosition);
-            if (item instanceof FragmentLifecycle) {
-                ((FragmentLifecycle) item).onResumeShow();
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            e.printStackTrace();
-        }
+    @Override
+    public void onPageSelected(int position) {
+        mSelectedPosition = position;
     }
 }

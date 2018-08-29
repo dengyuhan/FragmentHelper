@@ -96,6 +96,7 @@ public class FragmentHelper {
 
     /**
      * 当fragment里面有子fragment
+     *
      * @param viewPager
      */
     public static void bindChildFragmentLifecycle(ViewPager viewPager) {
@@ -103,5 +104,45 @@ public class FragmentHelper {
         if (adapter != null && adapter instanceof FragmentPagerAdapter) {
             viewPager.addOnPageChangeListener(new OnFragmentPageChangeListener((FragmentPagerAdapter) adapter, viewPager.getCurrentItem()));
         }
+    }
+
+
+    /**
+     * 对viewpager里的fragment批量做操作
+     *
+     * @param viewPager
+     * @param runnable
+     */
+    public static void callPagerFragmentRunnable(ViewPager viewPager, OnFragmentPagerRunnable runnable) {
+        if (runnable != null) {
+            final PagerAdapter adapter = viewPager.getAdapter();
+            if (adapter instanceof FragmentPagerAdapter) {
+                final int count = adapter.getCount();
+                for (int i = 0; i < count; i++) {
+                    final Fragment item = ((FragmentPagerAdapter) adapter).getItem(i);
+                    runnable.onFragmentItemRun(i, item);
+                }
+            }
+        }
+    }
+
+    /**
+     * 从viewpager里找到当前的fragment执行一些操作
+     * @param viewPager
+     * @param runnable
+     */
+    public static void callPagerCurrentFragmentRunnable(ViewPager viewPager, OnFragmentPagerRunnable runnable) {
+        if (runnable != null) {
+            final PagerAdapter adapter = viewPager.getAdapter();
+            if (adapter instanceof FragmentPagerAdapter) {
+                final int currentItem = viewPager.getCurrentItem();
+                final Fragment item = ((FragmentPagerAdapter) adapter).getItem(currentItem);
+                runnable.onFragmentItemRun(currentItem, item);
+            }
+        }
+    }
+
+    public interface OnFragmentPagerRunnable {
+        void onFragmentItemRun(int index, Fragment item);
     }
 }
