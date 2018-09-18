@@ -36,7 +36,12 @@ public class FragmentHelper {
         this.mContainerViewId = containerViewId;
         this.mFragments = fragments;
 
-        this.mFragmentManager.registerFragmentLifecycleCallbacks(new ShowFragmentLifecycleCallbacks(), false);
+        this.mFragmentManager.registerFragmentLifecycleCallbacks(new ShowFragmentLifecycleCallbacks(new OnAllowFragmentLifecycleCallback() {
+            @Override
+            public boolean onAllowLifecycle(Fragment fragment) {
+                return mLastShowFragment == fragment;
+            }
+        }), false);
     }
 
     public List<Fragment> getFragments() {
@@ -128,6 +133,7 @@ public class FragmentHelper {
 
     /**
      * 从viewpager里找到当前的fragment执行一些操作
+     *
      * @param viewPager
      * @param runnable
      */

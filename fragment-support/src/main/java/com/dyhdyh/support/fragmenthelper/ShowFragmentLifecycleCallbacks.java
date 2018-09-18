@@ -10,16 +10,22 @@ import android.support.v4.app.FragmentManager;
  */
 public class ShowFragmentLifecycleCallbacks extends FragmentManager.FragmentLifecycleCallbacks {
 
+    private OnAllowFragmentLifecycleCallback mAllowCallback;
+
+    public ShowFragmentLifecycleCallbacks(OnAllowFragmentLifecycleCallback callback) {
+        this.mAllowCallback = callback;
+    }
+
     @Override
     public void onFragmentResumed(FragmentManager fm, Fragment f) {
-        if (f instanceof FragmentLifecycle){
+        if (mAllowCallback != null && mAllowCallback.onAllowLifecycle(f) && f instanceof FragmentLifecycle) {
             ((FragmentLifecycle) f).onResumeShow();
         }
     }
 
     @Override
     public void onFragmentPaused(FragmentManager fm, Fragment f) {
-        if (f instanceof FragmentLifecycle){
+        if (mAllowCallback != null && mAllowCallback.onAllowLifecycle(f) && f instanceof FragmentLifecycle) {
             ((FragmentLifecycle) f).onPauseShow();
         }
     }
