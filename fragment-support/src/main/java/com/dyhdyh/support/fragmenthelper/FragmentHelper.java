@@ -58,6 +58,14 @@ public class FragmentHelper {
                 return;
             }
             FragmentTransaction transaction = mFragmentManager.beginTransaction();
+            //隐藏上一次选中的fragment
+            if (mLastShowFragment != null) {
+                transaction.hide(mLastShowFragment);
+                if (mLastShowFragment instanceof FragmentLifecycle) {
+                    ((FragmentLifecycle) mLastShowFragment).onPauseShow();
+                }
+            }
+
             if (fragment.isAdded()) {
                 //如果已经加过 显示当前选的
                 transaction.show(fragment);
@@ -67,13 +75,7 @@ public class FragmentHelper {
             } else {
                 transaction.add(mContainerViewId, fragment, fragment.getClass().getName());
             }
-            //隐藏上一次选中的fragment
-            if (mLastShowFragment != null) {
-                transaction.hide(mLastShowFragment);
-                if (mLastShowFragment instanceof FragmentLifecycle) {
-                    ((FragmentLifecycle) mLastShowFragment).onPauseShow();
-                }
-            }
+
             mLastShowFragment = fragment;
             transaction.commitAllowingStateLoss();
             mFragmentManager.executePendingTransactions();
