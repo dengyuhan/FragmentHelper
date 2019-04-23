@@ -22,7 +22,6 @@ public final class FragmentPageManager {
     }
 
     /**
-     *
      * @param fm
      * @param viewPager
      * @param resumedCallback 是否在注册时根据状态回调一次
@@ -38,7 +37,12 @@ public final class FragmentPageManager {
             if (resumedCallback) {
                 final Fragment fragment = ((FragmentPagerAdapter) adapter).getItem(currentItem);
                 if (fragment.isResumed()) {
-                    FragmentLifecycleManager.notifyResumeShow(fragment, false);
+                    viewPager.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            FragmentLifecycleManager.notifyResumeShow(fragment, false);
+                        }
+                    });
                 }
             }
         }

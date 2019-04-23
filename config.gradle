@@ -4,8 +4,8 @@ ext {
                     applicationId    : "com.dyhdyh.support.fragmenthelper.example",
 
                     //版本号
-                    versionCode      : 17,
-                    versionName      : "1.1.6",
+                    versionCode      : 18,
+                    versionName      : "1.1.7",
 
                     //sdk版本
                     compileSdkVersion: 27,
