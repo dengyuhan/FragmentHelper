@@ -18,10 +18,29 @@ import com.dyhdyh.support.fragmenthelper.listener.OnFragmentPageChangeListener;
 public final class FragmentPageManager {
 
     public static void registerFragmentShowLifecycle(FragmentManager fm, ViewPager viewPager) {
+        registerFragmentShowLifecycle(fm, viewPager, true);
+    }
+
+    /**
+     *
+     * @param fm
+     * @param viewPager
+     * @param resumedCallback 是否在注册时根据状态回调一次
+     */
+    public static void registerFragmentShowLifecycle(FragmentManager fm, ViewPager viewPager, boolean resumedCallback) {
         final PagerAdapter adapter = viewPager.getAdapter();
         if (adapter instanceof FragmentPagerAdapter) {
+            final int currentItem = viewPager.getCurrentItem();
             fm.registerFragmentLifecycleCallbacks(new FragmentPagerShowLifecycleCallbacks(viewPager), false);
-            viewPager.addOnPageChangeListener(new OnFragmentPageChangeListener((FragmentPagerAdapter) adapter, viewPager.getCurrentItem()));
+            viewPager.addOnPageChangeListener(new OnFragmentPageChangeListener((FragmentPagerAdapter) adapter, currentItem));
+
+            //如果是onResume之后才注册的 就手动回调一次
+            if (resumedCallback) {
+                final Fragment fragment = ((FragmentPagerAdapter) adapter).getItem(currentItem);
+                if (fragment.isResumed()) {
+                    FragmentLifecycleManager.notifyResumeShow(fragment, false);
+                }
+            }
         }
     }
 
