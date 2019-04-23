@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 
 import com.dyhdyh.support.fragmenthelper.listener.OnFragmentChangeListener;
@@ -16,7 +17,7 @@ import java.util.List;
 
 /**
  * @author dengyuhan
- *         created 2017/11/10 11:36
+ * created 2017/11/10 11:36
  */
 public class FragmentHelper {
     private FragmentManager mFragmentManager;
@@ -92,10 +93,21 @@ public class FragmentHelper {
         this.mOnFragmentChangeListener = onFragmentChangeListener;
     }
 
+    public static void registerFragmentLifecycle(FragmentManager fm, ViewPager viewPager) {
+        bindFragmentLifecycle(fm, viewPager);
+    }
 
+    /**
+     * 注册Fragment回调
+     *
+     * @param fm
+     * @param viewPager
+     * @deprecated registerFragmentLifecycle
+     */
+    @Deprecated
     public static void bindFragmentLifecycle(FragmentManager fm, ViewPager viewPager) {
         final PagerAdapter adapter = viewPager.getAdapter();
-        if (adapter != null && adapter instanceof FragmentPagerAdapter) {
+        if (adapter instanceof FragmentPagerAdapter) {
             fm.registerFragmentLifecycleCallbacks(new ShowFragmentPagerLifecycleCallbacks(viewPager), false);
             viewPager.addOnPageChangeListener(new OnFragmentPageChangeListener((FragmentPagerAdapter) adapter, viewPager.getCurrentItem()));
         }
@@ -105,14 +117,51 @@ public class FragmentHelper {
      * 当fragment里面有子fragment
      *
      * @param viewPager
+     * @deprecated registerChildFragmentLifecycle
      */
+    @Deprecated
     public static void bindChildFragmentLifecycle(ViewPager viewPager) {
         final PagerAdapter adapter = viewPager.getAdapter();
-        if (adapter != null && adapter instanceof FragmentPagerAdapter) {
+        if (adapter instanceof FragmentPagerAdapter) {
             viewPager.addOnPageChangeListener(new OnFragmentPageChangeListener((FragmentPagerAdapter) adapter, viewPager.getCurrentItem()));
         }
     }
 
+    public static void registerChildFragmentLifecycle(ViewPager viewPager) {
+        bindChildFragmentLifecycle(viewPager);
+    }
+
+
+    public static void onChildResumeShow(ViewPager viewPager) {
+        callPagerCurrentFragmentRunnable(viewPager, new OnFragmentPagerRunnable() {
+            @Override
+            public void onFragmentItemRun(int index, Fragment item) {
+                if (item instanceof FragmentLifecycle) {
+                    if (ViewCompat.isLaidOut(viewPager)) {
+                        ((FragmentLifecycle) item).onResumeShow();
+                    } else {
+                        viewPager.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                ((FragmentLifecycle) item).onResumeShow();
+                            }
+                        });
+                    }
+                }
+            }
+        });
+    }
+
+    public static void onChildPauseShow(ViewPager viewPager) {
+        callPagerCurrentFragmentRunnable(viewPager, new OnFragmentPagerRunnable() {
+            @Override
+            public void onFragmentItemRun(int index, Fragment item) {
+                if (item instanceof FragmentLifecycle) {
+                    ((FragmentLifecycle) item).onPauseShow();
+                }
+            }
+        });
+    }
 
     /**
      * 对viewpager里的fragment批量做操作

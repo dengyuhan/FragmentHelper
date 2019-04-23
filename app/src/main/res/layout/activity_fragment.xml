@@ -6,15 +6,18 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <Button
+    <FrameLayout
+        android:id="@+id/fragment_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="clickFragmentActivity"
-        android:text="FragmentActivity" />
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
-    <Button
+    <View android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="@color/colorPrimary"/>
+
+    <android.support.design.widget.TabLayout
+        android:id="@+id/tab"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="clickViewPagerActivity"
-        android:text="ViewPagerActivity" />
+        android:layout_height="wrap_content" />
 </LinearLayout>

@@ -14,14 +14,16 @@ import com.dyhdyh.support.fragmenthelper.FragmentLifecycle;
 
 /**
  * @author dengyuhan
- *         created 2018/7/13 14:31
+ * created 2018/7/13 14:31
  */
 public abstract class BaseFragment extends Fragment implements FragmentLifecycle {
+    protected TextView tv;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View layout = inflater.inflate(R.layout.fragment_layout, container, false);
-        final TextView tv = layout.findViewById(R.id.tv);
+        tv = layout.findViewById(R.id.tv);
         tv.setText(getLabel());
         return layout;
     }
@@ -31,11 +33,13 @@ public abstract class BaseFragment extends Fragment implements FragmentLifecycle
 
     @Override
     public void onResumeShow() {
+        tv.setText("Resume " + getLabel());
         Log.d("---->", "--------->" + this + "---->显示在最前");
     }
 
     @Override
     public void onPauseShow() {
+        tv.setText("Pause " + getLabel());
         Log.d("---->", "--------->" + this + "---->退到后台");
     }
 

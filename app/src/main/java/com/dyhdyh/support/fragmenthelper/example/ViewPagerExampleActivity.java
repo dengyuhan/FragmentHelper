@@ -9,9 +9,9 @@ import com.dyhdyh.support.fragmenthelper.adapter.SimpleFragmentPagerAdapter;
 
 /**
  * @author dengyuhan
- *         created 2018/7/13 14:44
+ * created 2018/7/13 14:44
  */
-public class ViewPagerActivity extends AppCompatActivity {
+public class ViewPagerExampleActivity extends AppCompatActivity {
     ViewPager vp;
 
     @Override
@@ -21,7 +21,7 @@ public class ViewPagerActivity extends AppCompatActivity {
         vp = findViewById(R.id.vp);
 
         BaseFragment[] fragments = new BaseFragment[]{
-                new AFragment(), new BFragment(), new CFragment(), new DFragment()
+                NestingFragment.create("1"), NestingFragment.create("2"), NestingFragment.create("3"), NestingFragment.create("4")
         };
         SimpleFragmentPagerAdapter adapter = new SimpleFragmentPagerAdapter(getSupportFragmentManager(), fragments);
         vp.setAdapter(adapter);
