@@ -133,23 +133,24 @@ public class FragmentHelper {
 
 
     public static void onChildResumeShow(ViewPager viewPager) {
-        callPagerCurrentFragmentRunnable(viewPager, new OnFragmentPagerRunnable() {
+        final OnFragmentPagerRunnable runnable = new OnFragmentPagerRunnable() {
             @Override
             public void onFragmentItemRun(int index, Fragment item) {
                 if (item instanceof FragmentLifecycle) {
-                    if (ViewCompat.isLaidOut(viewPager)) {
-                        ((FragmentLifecycle) item).onResumeShow();
-                    } else {
-                        viewPager.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                ((FragmentLifecycle) item).onResumeShow();
-                            }
-                        });
-                    }
+                    ((FragmentLifecycle) item).onResumeShow();
                 }
             }
-        });
+        };
+        if (ViewCompat.isLaidOut(viewPager)) {
+            callPagerCurrentFragmentRunnable(viewPager, runnable);
+        } else {
+            viewPager.post(new Runnable() {
+                @Override
+                public void run() {
+                    callPagerCurrentFragmentRunnable(viewPager, runnable);
+                }
+            });
+        }
     }
 
     public static void onChildPauseShow(ViewPager viewPager) {
