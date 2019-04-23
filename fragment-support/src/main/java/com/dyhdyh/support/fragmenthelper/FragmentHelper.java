@@ -3,23 +3,18 @@ package com.dyhdyh.support.fragmenthelper;
 import android.support.annotation.IdRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewCompat;
-import android.support.v4.view.ViewPager;
 
 import com.dyhdyh.support.fragmenthelper.listener.OnFragmentChangeListener;
-import com.dyhdyh.support.fragmenthelper.listener.OnFragmentPageChangeListener;
 
 import java.util.Arrays;
 import java.util.List;
 
 /**
  * @author dengyuhan
- * created 2017/11/10 11:36
+ * created 2019/4/23 17:58
  */
-public class FragmentHelper {
+public final class FragmentHelper {
     private FragmentManager mFragmentManager;
     private @IdRes
     int mContainerViewId;
@@ -28,21 +23,45 @@ public class FragmentHelper {
 
     private Fragment mLastShowFragment;
 
-    public FragmentHelper(FragmentManager fragmentManager, @IdRes int containerViewId, Fragment... fragmentArray) {
-        this(fragmentManager, containerViewId, Arrays.asList(fragmentArray));
-    }
+    private boolean mAllowingStateLoss;
 
-    public FragmentHelper(FragmentManager fragmentManager, @IdRes int containerViewId, List<Fragment> fragments) {
+
+    public FragmentHelper(FragmentManager fragmentManager, @IdRes int containerViewId) {
         this.mFragmentManager = fragmentManager;
         this.mContainerViewId = containerViewId;
-        this.mFragments = fragments;
 
-        this.mFragmentManager.registerFragmentLifecycleCallbacks(new ShowFragmentLifecycleCallbacks(new OnAllowFragmentLifecycleCallback() {
+        this.mFragmentManager.registerFragmentLifecycleCallbacks(new FragmentShowLifecycleCallbacks(new OnAllowFragmentLifecycleCallback() {
             @Override
             public boolean onAllowLifecycle(Fragment fragment) {
                 return mLastShowFragment == fragment;
             }
         }), false);
+    }
+
+    public FragmentHelper setAllowingStateLoss(boolean allowingStateLoss) {
+        this.mAllowingStateLoss = allowingStateLoss;
+        return this;
+    }
+
+    public FragmentHelper setFragments(Fragment... fragments) {
+        this.mFragments = Arrays.asList(fragments);
+        return this;
+    }
+
+    public FragmentHelper setFragments(List<Fragment> fragments) {
+        this.mFragments = fragments;
+        return this;
+    }
+
+    public FragmentHelper build() {
+        return build(true);
+    }
+
+    public FragmentHelper build(boolean changed) {
+        if (changed) {
+            changeFragment(0);
+        }
+        return this;
     }
 
     public List<Fragment> getFragments() {
@@ -62,145 +81,59 @@ public class FragmentHelper {
             //隐藏上一次选中的fragment
             if (mLastShowFragment != null) {
                 transaction.hide(mLastShowFragment);
-                if (mLastShowFragment instanceof FragmentLifecycle) {
-                    ((FragmentLifecycle) mLastShowFragment).onPauseShow();
-                }
+                FragmentLifecycleManager.notifyPauseShow(mLastShowFragment, false);
             }
 
             if (fragment.isAdded()) {
                 //如果已经加过 显示当前选的
                 transaction.show(fragment);
-                if (fragment instanceof FragmentLifecycle) {
-                    ((FragmentLifecycle) fragment).onResumeShow();
-                }
+                FragmentLifecycleManager.notifyResumeShow(mLastShowFragment, false);
             } else {
                 transaction.add(mContainerViewId, fragment, fragment.getClass().getName());
             }
 
             mLastShowFragment = fragment;
-            transaction.commitAllowingStateLoss();
-            mFragmentManager.executePendingTransactions();
-
-            if (mOnFragmentChangeListener != null) {
-                mOnFragmentChangeListener.onFragmentChanged(fragment);
+            if (mAllowingStateLoss) {
+                transaction.commitAllowingStateLoss();
+            } else {
+                transaction.commit();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void setOnFragmentChangeListener(OnFragmentChangeListener onFragmentChangeListener) {
+    public FragmentHelper setOnFragmentChangeListener(OnFragmentChangeListener onFragmentChangeListener) {
         this.mOnFragmentChangeListener = onFragmentChangeListener;
+        return this;
     }
 
-    public static void registerFragmentLifecycle(FragmentManager fm, ViewPager viewPager) {
-        bindFragmentLifecycle(fm, viewPager);
-    }
 
-    /**
-     * 注册Fragment回调
-     *
-     * @param fm
-     * @param viewPager
-     * @deprecated registerFragmentLifecycle
-     */
-    @Deprecated
-    public static void bindFragmentLifecycle(FragmentManager fm, ViewPager viewPager) {
-        final PagerAdapter adapter = viewPager.getAdapter();
-        if (adapter instanceof FragmentPagerAdapter) {
-            fm.registerFragmentLifecycleCallbacks(new ShowFragmentPagerLifecycleCallbacks(viewPager), false);
-            viewPager.addOnPageChangeListener(new OnFragmentPageChangeListener((FragmentPagerAdapter) adapter, viewPager.getCurrentItem()));
+    private static class FragmentShowLifecycleCallbacks extends FragmentManager.FragmentLifecycleCallbacks {
+
+        private OnAllowFragmentLifecycleCallback mAllowCallback;
+
+        public FragmentShowLifecycleCallbacks(OnAllowFragmentLifecycleCallback callback) {
+            this.mAllowCallback = callback;
         }
-    }
 
-    /**
-     * 当fragment里面有子fragment
-     *
-     * @param viewPager
-     * @deprecated registerChildFragmentLifecycle
-     */
-    @Deprecated
-    public static void bindChildFragmentLifecycle(ViewPager viewPager) {
-        final PagerAdapter adapter = viewPager.getAdapter();
-        if (adapter instanceof FragmentPagerAdapter) {
-            viewPager.addOnPageChangeListener(new OnFragmentPageChangeListener((FragmentPagerAdapter) adapter, viewPager.getCurrentItem()));
-        }
-    }
-
-    public static void registerChildFragmentLifecycle(ViewPager viewPager) {
-        bindChildFragmentLifecycle(viewPager);
-    }
-
-
-    public static void onChildResumeShow(ViewPager viewPager) {
-        final OnFragmentPagerRunnable runnable = new OnFragmentPagerRunnable() {
-            @Override
-            public void onFragmentItemRun(int index, Fragment item) {
-                if (item instanceof FragmentLifecycle) {
-                    ((FragmentLifecycle) item).onResumeShow();
-                }
-            }
-        };
-        if (ViewCompat.isLaidOut(viewPager)) {
-            callPagerCurrentFragmentRunnable(viewPager, runnable);
-        } else {
-            viewPager.post(new Runnable() {
-                @Override
-                public void run() {
-                    callPagerCurrentFragmentRunnable(viewPager, runnable);
-                }
-            });
-        }
-    }
-
-    public static void onChildPauseShow(ViewPager viewPager) {
-        callPagerCurrentFragmentRunnable(viewPager, new OnFragmentPagerRunnable() {
-            @Override
-            public void onFragmentItemRun(int index, Fragment item) {
-                if (item instanceof FragmentLifecycle) {
-                    ((FragmentLifecycle) item).onPauseShow();
-                }
-            }
-        });
-    }
-
-    /**
-     * 对viewpager里的fragment批量做操作
-     *
-     * @param viewPager
-     * @param runnable
-     */
-    public static void callPagerFragmentRunnable(ViewPager viewPager, OnFragmentPagerRunnable runnable) {
-        if (runnable != null) {
-            final PagerAdapter adapter = viewPager.getAdapter();
-            if (adapter instanceof FragmentPagerAdapter) {
-                final int count = adapter.getCount();
-                for (int i = 0; i < count; i++) {
-                    final Fragment item = ((FragmentPagerAdapter) adapter).getItem(i);
-                    runnable.onFragmentItemRun(i, item);
-                }
+        @Override
+        public void onFragmentResumed(FragmentManager fm, Fragment f) {
+            if (mAllowCallback != null && mAllowCallback.onAllowLifecycle(f) && f instanceof FragmentLifecycle) {
+                FragmentLifecycleManager.notifyResumeShow(f, true);
             }
         }
-    }
 
-    /**
-     * 从viewpager里找到当前的fragment执行一些操作
-     *
-     * @param viewPager
-     * @param runnable
-     */
-    public static void callPagerCurrentFragmentRunnable(ViewPager viewPager, OnFragmentPagerRunnable runnable) {
-        if (runnable != null) {
-            final PagerAdapter adapter = viewPager.getAdapter();
-            if (adapter instanceof FragmentPagerAdapter) {
-                final int currentItem = viewPager.getCurrentItem();
-                final Fragment item = ((FragmentPagerAdapter) adapter).getItem(currentItem);
-                runnable.onFragmentItemRun(currentItem, item);
+        @Override
+        public void onFragmentPaused(FragmentManager fm, Fragment f) {
+            if (mAllowCallback != null && mAllowCallback.onAllowLifecycle(f) && f instanceof FragmentLifecycle) {
+                FragmentLifecycleManager.notifyPauseShow(f, true);
             }
         }
-    }
 
-    public interface OnFragmentPagerRunnable {
-        void onFragmentItemRun(int index, Fragment item);
+        @Override
+        public void onFragmentDestroyed(FragmentManager fm, Fragment f) {
+            FragmentLifecycleManager.notifyDestroy(f);
+        }
     }
 }

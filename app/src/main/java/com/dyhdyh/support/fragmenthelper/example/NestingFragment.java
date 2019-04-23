@@ -7,7 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.dyhdyh.support.fragmenthelper.FragmentHelper;
+import com.dyhdyh.support.fragmenthelper.FragmentPageManager;
 import com.dyhdyh.support.fragmenthelper.adapter.SimpleFragmentPagerAdapter;
 
 /**
@@ -35,26 +35,27 @@ public class NestingFragment extends LabelFragment {
         viewPager = layout.findViewById(R.id.vp);
 
         BaseFragment[] fragments = new BaseFragment[]{
-                LabelFragment.create(getLabel() + " A"), LabelFragment.create(getLabel() + " B"), LabelFragment.create(getLabel() + " C"), LabelFragment.create(getLabel() + " D")
+                LabelFragment.create(getLabel() + "- A"), LabelFragment.create(getLabel() + "- B"), LabelFragment.create(getLabel() + "- C"), LabelFragment.create(getLabel() + "- D")
         };
         SimpleFragmentPagerAdapter adapter = new SimpleFragmentPagerAdapter(getChildFragmentManager(), fragments);
         viewPager.setAdapter(adapter);
-        FragmentHelper.registerChildFragmentLifecycle(viewPager);
+        FragmentPageManager.registerChildFragmentShowLifecycle(viewPager);
         return layout;
     }
 
 
     @Override
-    public void onResumeShow() {
-        super.onResumeShow();
+    public void onResumeShow(boolean lifecycle) {
+        super.onResumeShow(lifecycle);
 
-        FragmentHelper.onChildResumeShow(viewPager);
+        FragmentPageManager.notifyCurrentResumeShow(viewPager);
     }
 
     @Override
-    public void onPauseShow() {
-        super.onPauseShow();
+    public void onPauseShow(boolean lifecycle) {
+        super.onPauseShow(lifecycle);
 
-        FragmentHelper.onChildPauseShow(viewPager);
+        FragmentPageManager.notifyCurrentPauseShow(viewPager);
     }
+
 }

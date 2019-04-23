@@ -1,11 +1,35 @@
-维护Fragment的显示状态
+## 全局回调
+#### 注册回调
+```
+FragmentLifecycleManager.registerFragmentShowCallbacks(new FragmentLifecycleManager.FragmentShowLifecycleCallbacks() {
+    @Override
+    public void onResumeShowed(Fragment f, boolean lifecycle) {
+        //lifecycle：这次回调是否来自生命周期
+        Log.d("---->", "显示在最前");
+    }
 
-## ViewPager
+    @Override
+    public void onResumePaused(Fragment f, boolean lifecycle) {
+        Log.d("---->", "处于不显示");
+    }
+});
+```
+#### 注销回调
+```
+@Override
+protected void onDestroy() {
+    super.onDestroy();
+    FragmentLifecycleManager.unregisterFragmentShowCallbacks();
+}
+```
+
+
+## ViewPager + Fragment
 #### Fragment
-如果是`ViewPager`+`Fragment`，`viewpager.setAdapter`后注册回调
+`viewpager.setAdapter`后注册回调
 
 ```
-FragmentHelper.bindFragmentLifecycle(getSupportFragmentManager(), viewpager);
+FragmentPageManager.registerFragmentShowLifecycle(getSupportFragmentManager(), viewpager);
 ```
 
 #### 嵌套Fragment
@@ -19,27 +43,28 @@ FragmentHelper.registerChildFragmentLifecycle(viewPager);
 
 ```
 @Override
-public void onResumeShow() {
-    FragmentHelper.onChildResumeShow(viewPager);
+public void onResumeShow(boolean lifecycle) {
+    FragmentPageManager.notifyCurrentResumeShow(viewPager);
 }
 
 @Override
-public void onPauseShow() {
-    FragmentHelper.onChildPauseShow(viewPager);
+public void onPauseShow(boolean lifecycle) {
+    FragmentPageManager.notifyCurrentResumeShow(viewPager);
 }
 ```
 
 #### 回调
-Fragment实现`FragmentLifecycle`，即会回调`onResumeShow`和`onPauseShow`
+在Fragment实现`FragmentLifecycle`，即会回调`onResumeShow`和`onPauseShow`
 
 ```
 @Override
-public void onResumeShow() {
+public void onResumeShow(boolean lifecycle) {
     Log.d("---->", "显示在最前");
 }
 
 @Override
-public void onPauseShow() {
-    Log.d("---->", "不显示了");
+public void onPauseShow(boolean lifecycle) {
+    //lifecycle：这次回调是否来自生命周期
+    Log.d("---->", "处于不显示");
 }
 ```

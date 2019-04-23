@@ -4,11 +4,11 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 
-import com.dyhdyh.support.fragmenthelper.FragmentLifecycle;
+import com.dyhdyh.support.fragmenthelper.FragmentLifecycleManager;
 
 /**
  * @author dengyuhan
- *         created 2018/7/13 15:46
+ * created 2018/7/13 15:46
  */
 public class OnFragmentPageChangeListener extends ViewPager.SimpleOnPageChangeListener {
     private FragmentPagerAdapter mAdapter;
@@ -28,9 +28,7 @@ public class OnFragmentPageChangeListener extends ViewPager.SimpleOnPageChangeLi
                 mSelectedPosition = -1;
                 if (this.mPosition >= 0) {
                     Fragment item = mAdapter.getItem(this.mPosition);
-                    if (item instanceof FragmentLifecycle) {
-                        ((FragmentLifecycle) item).onPauseShow();
-                    }
+                    FragmentLifecycleManager.notifyPauseShow(item, false);
                 }
             } catch (ArrayIndexOutOfBoundsException e) {
                 e.printStackTrace();
@@ -40,9 +38,7 @@ public class OnFragmentPageChangeListener extends ViewPager.SimpleOnPageChangeLi
 
             try {
                 Fragment item = mAdapter.getItem(this.mPosition);
-                if (item instanceof FragmentLifecycle) {
-                    ((FragmentLifecycle) item).onResumeShow();
-                }
+                FragmentLifecycleManager.notifyResumeShow(item, false);
             } catch (ArrayIndexOutOfBoundsException e) {
                 e.printStackTrace();
             }

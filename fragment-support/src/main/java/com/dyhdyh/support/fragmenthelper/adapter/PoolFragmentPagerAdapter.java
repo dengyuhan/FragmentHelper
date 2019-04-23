@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class PoolFragmentPagerAdapter extends SimpleFragmentPagerAdapter {
     //默认5个
-    private int mMaxPoolCount = 2;
+    private int mMaxPoolCount = 5;
 
     public PoolFragmentPagerAdapter(FragmentManager fm, Fragment... fragmentArray) {
         super(fm, fragmentArray);
