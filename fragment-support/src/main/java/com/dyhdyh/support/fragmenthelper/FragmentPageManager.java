@@ -48,15 +48,39 @@ public final class FragmentPageManager {
         }
     }
 
+    public static void registerChildFragmentShowLifecycle(Fragment container, ViewPager viewPager) {
+        registerChildFragmentShowLifecycle(container, viewPager, true);
+    }
+
+    public static void registerChildFragmentShowLifecycle(ViewPager viewPager) {
+        registerChildFragmentShowLifecycle(null, viewPager, false);
+    }
+
     /**
      * 当fragment里面有子fragment
      *
+     * @param container 容器Fragment
      * @param viewPager
+     * @param resumedCallback 是否在注册时根据状态回调一次
      */
-    public static void registerChildFragmentShowLifecycle(ViewPager viewPager) {
+    private static void registerChildFragmentShowLifecycle(Fragment container, ViewPager viewPager, boolean resumedCallback) {
         final PagerAdapter adapter = viewPager.getAdapter();
         if (adapter instanceof FragmentPagerAdapter) {
-            viewPager.addOnPageChangeListener(new OnFragmentPageChangeListener((FragmentPagerAdapter) adapter, viewPager.getCurrentItem()));
+            final int currentItem = viewPager.getCurrentItem();
+            viewPager.addOnPageChangeListener(new OnFragmentPageChangeListener((FragmentPagerAdapter) adapter, currentItem));
+
+            //如果是onResume之后才注册的 就用当前的显示的手动回调一次
+            if (resumedCallback && FragmentLifecycleManager.isResumeShowed(container)) {
+                final Fragment fragment = ((FragmentPagerAdapter) adapter).getItem(currentItem);
+                if (fragment.isResumed()) {
+                    viewPager.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            FragmentLifecycleManager.notifyResumeShow(fragment, false);
+                        }
+                    });
+                }
+            }
         }
     }
 

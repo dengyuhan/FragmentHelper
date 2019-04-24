@@ -9,7 +9,7 @@ FragmentLifecycleManager.registerFragmentShowCallbacks(new FragmentLifecycleMana
     }
 
     @Override
-    public void onResumePaused(Fragment f, boolean lifecycle) {
+    public void onPauseShowed(Fragment f, boolean lifecycle) {
         Log.d("---->", "处于不显示");
     }
 });
@@ -36,7 +36,7 @@ FragmentPageManager.registerFragmentShowLifecycle(getSupportFragmentManager(), v
 如果是`ViewPager`+`Fragment`，Fragment里还有`ViewPager`+`Fragment`，先Activity中的`viewpager.setAdapter`后注册回调
 
 ```
-FragmentHelper.registerChildFragmentLifecycle(viewPager);
+FragmentHelper.registerChildFragmentLifecycle(NestingFragment.this, viewPager);
 ```
 
 再在Fragment中手动回调子Fragment

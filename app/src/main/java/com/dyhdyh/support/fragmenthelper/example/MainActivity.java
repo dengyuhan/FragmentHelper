@@ -19,14 +19,12 @@ public class MainActivity extends AppCompatActivity {
         FragmentLifecycleManager.registerFragmentShowCallbacks(new FragmentLifecycleManager.FragmentShowLifecycleCallbacks() {
             @Override
             public void onResumeShowed(Fragment f, boolean lifecycle) {
-                String tag = lifecycle ? "来自生命周期" : "";
-                Log.d(tag + "---->", "显示在最前-----> " + f);
+                Log.d(lifecycle ? "来自生命周期" : "" + "---->", "显示在最前-----> " + this);
             }
 
             @Override
-            public void onResumePaused(Fragment f, boolean lifecycle) {
-                String tag = lifecycle ? "来自生命周期" : "";
-                Log.d(tag + "---->", "处于不显示-----> " + f);
+            public void onPauseShowed(Fragment f, boolean lifecycle) {
+                Log.d(lifecycle ? "来自生命周期" : "" + "---->", "处于不显示-----> " + this);
             }
 
         });

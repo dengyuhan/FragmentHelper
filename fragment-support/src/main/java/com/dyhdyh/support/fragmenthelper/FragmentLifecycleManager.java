@@ -47,7 +47,7 @@ public final class FragmentLifecycleManager {
             mStateArray.put(fragment.hashCode(), false);
             ((FragmentLifecycle) fragment).onPauseShow(lifecycle);
             if (mCallbacks != null) {
-                mCallbacks.onResumePaused(fragment, lifecycle);
+                mCallbacks.onPauseShowed(fragment, lifecycle);
             }
         }
     }
@@ -76,6 +76,6 @@ public final class FragmentLifecycleManager {
 
         void onResumeShowed(Fragment f, boolean lifecycle);
 
-        void onResumePaused(Fragment f, boolean lifecycle);
+        void onPauseShowed(Fragment f, boolean lifecycle);
     }
 }

@@ -39,7 +39,7 @@ public class NestingFragment extends LabelFragment {
         };
         SimpleFragmentPagerAdapter adapter = new SimpleFragmentPagerAdapter(getChildFragmentManager(), fragments);
         viewPager.setAdapter(adapter);
-        FragmentPageManager.registerChildFragmentShowLifecycle(viewPager);
+        FragmentPageManager.registerChildFragmentShowLifecycle(this, viewPager);
         return layout;
     }
 
